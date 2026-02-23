@@ -30,6 +30,7 @@ class _CalculatorHomeState extends State<CalculatorHome> {
   String currentOperator = '';
   bool awaitingSecondOperand = false;
   bool hasError = false;
+  bool isDarkMode = false;
 
   // button labels
   final List<String> buttonLabels = [
@@ -38,6 +39,7 @@ class _CalculatorHomeState extends State<CalculatorHome> {
     '1', '2', '3', '-',
     'AC', '0', '=', '+',
   ];
+
 
   // performs the arithmetic and returns result as a string
   String? calculate(String a, String op, String b) {
@@ -55,6 +57,10 @@ class _CalculatorHomeState extends State<CalculatorHome> {
 
   // operators
   final Set<String> operators = {'+', '-', '*', '/', '='};
+  // theme color helper
+  Color? get scaffoldBgColor => isDarkMode ? Colors.blueGrey[900] : Colors.blueGrey[100];
+  
+
 
   void onButtonPressed(String label) {
     setState(() {
@@ -106,7 +112,18 @@ class _CalculatorHomeState extends State<CalculatorHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Calculator')),
+      backgroundColor: scaffoldBgColor,
+      appBar: AppBar(
+        title: const Text('Calculator', style: TextStyle(color: Colors.white)),
+        backgroundColor: scaffoldBgColor,
+          actions: [
+          // theme toggle button
+          IconButton(
+            icon: Icon(isDarkMode ? Icons.wb_sunny : Icons.nightlight_round),
+            onPressed: () => setState(() => isDarkMode = !isDarkMode),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           // display area
