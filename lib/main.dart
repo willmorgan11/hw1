@@ -17,7 +17,6 @@ class CalculatorApp extends StatelessWidget {
   }
 }
 
-// calculator screen
 class CalculatorHome extends StatefulWidget {
   const CalculatorHome({super.key});
 
@@ -27,6 +26,21 @@ class CalculatorHome extends StatefulWidget {
 
 class _CalculatorHomeState extends State<CalculatorHome> {
   String displayText = '0';
+
+  // button labels
+  final List<String> buttonLabels = [
+    '7', '8', '9', '/',
+    '4', '5', '6', '*',
+    '1', '2', '3', '-',
+    'AC', '0', '=', '+',
+  ];
+
+  // operators
+  final Set<String> operators = {'+', '-', '*', '/', '='};
+
+  void onButtonPressed(String label) {
+    // logic will be added here
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,8 +60,32 @@ class _CalculatorHomeState extends State<CalculatorHome> {
               ),
             ),
           ),
-          // button grid will go here
-          const SizedBox(height: 200, child: Placeholder()),
+          // button grid
+          GridView.count(
+            crossAxisCount: 4,
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(8),
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            children: buttonLabels.map((label) {
+              final bool isOperator = operators.contains(label);
+              final bool isAC = label == 'AC';
+              return ElevatedButton(
+                onPressed: () => onButtonPressed(label),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isAC
+                      ? Colors.redAccent
+                      : isOperator
+                          ? Colors.blueGrey
+                          : Colors.grey,
+                  foregroundColor: isOperator || isAC ? Colors.white : Colors.white,
+                  textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: Text(label),
+              );
+            }).toList(),
+          ),
         ],
       ),
     );
