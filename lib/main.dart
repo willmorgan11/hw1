@@ -29,6 +29,7 @@ class _CalculatorHomeState extends State<CalculatorHome> {
   String firstOperand = '';
   String currentOperator = '';
   bool awaitingSecondOperand = false;
+  bool hasError = false;
 
   // button labels
   final List<String> buttonLabels = [
@@ -39,9 +40,10 @@ class _CalculatorHomeState extends State<CalculatorHome> {
   ];
 
   // performs the arithmetic and returns result as a string
-  String calculate(String a, String op, String b) {
+  String? calculate(String a, String op, String b) {
     int numA = int.parse(a);
     int numB = int.parse(b);
+    if (op == '/' && numB == 0) return null;
     switch (op) {
       case '+': return (numA + numB).toString();
       case '-': return (numA - numB).toString();
@@ -56,35 +58,45 @@ class _CalculatorHomeState extends State<CalculatorHome> {
 
   void onButtonPressed(String label) {
     setState(() {
+      if (hasError && label != 'AC') return; // only AC works if there is an error
       if (label == 'AC') {
         // reset
         displayText = '0';
         firstOperand = '';
         currentOperator = '';
         awaitingSecondOperand = false;
-
-      } else if (operators.contains(label) && label != '=') {
+        hasError = false;
+      } 
+      else if (operators.contains(label) && label != '=') {
         // store first operand and operator
         firstOperand = displayText;
         currentOperator = label;
         awaitingSecondOperand = true;
-
-      } else if (label == '=') {
-        // calculate result if we have both operands and an operator
-        if (firstOperand.isNotEmpty && currentOperator.isNotEmpty) {
-          displayText = calculate(firstOperand, currentOperator, displayText);
+      } 
+      else if (label == '=') {
+        if (firstOperand.isEmpty || currentOperator.isEmpty || awaitingSecondOperand) {
+          displayText = 'Error: incomplete input, press AC';
+          hasError = true;
+          return;
+        }
+        final result = calculate(firstOperand, currentOperator, displayText);
+        if (result == null) {
+          displayText = 'Error: cannot divide by 0, press AC';
+          hasError = true;
+        } 
+        else {
+          displayText = result;
           firstOperand = '';
           currentOperator = '';
           awaitingSecondOperand = false;
         }
-
-      } else {
-        // digit pressed 
+      }
+      else {
         if (awaitingSecondOperand) {
-          // set display text to second digit
           displayText = label;
           awaitingSecondOperand = false;
-        } else {
+        } 
+        else {
           displayText = (displayText == '0') ? label : displayText + label;
         }
       }
@@ -105,7 +117,7 @@ class _CalculatorHomeState extends State<CalculatorHome> {
               color: Colors.blueGrey,
               child: Text(
                 displayText,
-                style: const TextStyle(fontSize: 48, color: Colors.white),
+                style: TextStyle(fontSize: hasError ? 24 : 48, color: Colors.white),
               ),
             ),
           ),
