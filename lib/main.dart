@@ -26,6 +26,9 @@ class CalculatorHome extends StatefulWidget {
 
 class _CalculatorHomeState extends State<CalculatorHome> {
   String displayText = '0';
+  String firstOperand = '';
+  String currentOperator = '';
+  bool awaitingSecondOperand = false;
 
   // button labels
   final List<String> buttonLabels = [
@@ -35,11 +38,57 @@ class _CalculatorHomeState extends State<CalculatorHome> {
     'AC', '0', '=', '+',
   ];
 
+  // performs the arithmetic and returns result as a string
+  String calculate(String a, String op, String b) {
+    int numA = int.parse(a);
+    int numB = int.parse(b);
+    switch (op) {
+      case '+': return (numA + numB).toString();
+      case '-': return (numA - numB).toString();
+      case '*': return (numA * numB).toString();
+      case '/': return (numA ~/ numB).toString();
+      default:  return b;
+    }
+  }
+
   // operators
   final Set<String> operators = {'+', '-', '*', '/', '='};
 
   void onButtonPressed(String label) {
-    // logic will be added here
+    setState(() {
+      if (label == 'AC') {
+        // reset
+        displayText = '0';
+        firstOperand = '';
+        currentOperator = '';
+        awaitingSecondOperand = false;
+
+      } else if (operators.contains(label) && label != '=') {
+        // store first operand and operator
+        firstOperand = displayText;
+        currentOperator = label;
+        awaitingSecondOperand = true;
+
+      } else if (label == '=') {
+        // calculate result if we have both operands and an operator
+        if (firstOperand.isNotEmpty && currentOperator.isNotEmpty) {
+          displayText = calculate(firstOperand, currentOperator, displayText);
+          firstOperand = '';
+          currentOperator = '';
+          awaitingSecondOperand = false;
+        }
+
+      } else {
+        // digit pressed 
+        if (awaitingSecondOperand) {
+          // set display text to second digit
+          displayText = label;
+          awaitingSecondOperand = false;
+        } else {
+          displayText = (displayText == '0') ? label : displayText + label;
+        }
+      }
+    });
   }
 
   @override
